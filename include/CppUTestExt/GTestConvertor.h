@@ -54,7 +54,7 @@ class GTestFlagsThatAllocateMemory;
 
 namespace testing {
     class TestInfo;
-    class TestCase;
+    class TestSuite;
     class Test;
 }
 
@@ -180,8 +180,8 @@ public:
 protected:
     virtual void simulateGTestFailureToPreAllocateAllTheThreadLocalData();
 
-    virtual void addNewTestCaseForTestInfo(::testing::TestInfo* testinfo);
-    virtual void addAllTestsFromTestCaseToTestRegistry(::testing::TestCase* testcase);
+    virtual void addNewTestSuiteForTestInfo(::testing::TestInfo* testinfo);
+    virtual void addAllTestsFromTestSuiteToTestRegistry(::testing::TestSuite* TestSuite);
 
     virtual void createDummyInSequenceToAndFailureReporterAvoidMemoryLeakInGMock();
 private:
@@ -340,20 +340,20 @@ inline GTestConvertor::~GTestConvertor()
     }
 }
 
-inline void GTestConvertor::addNewTestCaseForTestInfo(::testing::TestInfo* testinfo)
+inline void GTestConvertor::addNewTestSuiteForTestInfo(::testing::TestInfo* testinfo)
 {
     first_ = new GTestShell(testinfo, first_, &flags_);
     TestRegistry::getCurrentRegistry()->addTest(first_);
 }
 
-inline void GTestConvertor::addAllTestsFromTestCaseToTestRegistry(::testing::TestCase* testcase)
+inline void GTestConvertor::addAllTestsFromTestSuiteToTestRegistry(::testing::TestSuite* TestSuite)
 {
     int currentTestCount = 0;
-    ::testing::TestInfo* currentTest = (::testing::TestInfo*) testcase->GetTestInfo(currentTestCount);
+    ::testing::TestInfo* currentTest = (::testing::TestInfo*) TestSuite->GetTestInfo(currentTestCount);
     while (currentTest) {
-        addNewTestCaseForTestInfo(currentTest);
+        addNewTestSuiteForTestInfo(currentTest);
         currentTestCount++;
-        currentTest = (::testing::TestInfo*) testcase->GetTestInfo(currentTestCount);
+        currentTest = (::testing::TestInfo*) TestSuite->GetTestInfo(currentTestCount);
     }
 }
 
@@ -375,11 +375,11 @@ inline void GTestConvertor::addAllGTestToTestRegistry()
     ::testing::UnitTest* unitTests = ::testing::UnitTest::GetInstance();
 
     int currentUnitTestCount = 0;
-    ::testing::TestCase* currentTestCase = (::testing::TestCase*) unitTests->GetTestCase(currentUnitTestCount);
-    while (currentTestCase) {
-        addAllTestsFromTestCaseToTestRegistry(currentTestCase);
+    ::testing::TestSuite* currentTestSuite = (::testing::TestSuite*) unitTests->GetTestSuite(currentUnitTestCount);
+    while (currentTestSuite) {
+        addAllTestsFromTestSuiteToTestRegistry(currentTestSuite);
         currentUnitTestCount++;
-        currentTestCase = (::testing::TestCase*) unitTests->GetTestCase(currentUnitTestCount);
+        currentTestSuite = (::testing::TestSuite*) unitTests->GetTestSuite(currentUnitTestCount);
     }
 }
 
